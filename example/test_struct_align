@@ -1,0 +1,31 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <signal.h>
+#include <string.h>
+
+#include "jl_switch.h"
+
+int main(int argc, char *argv[])
+{
+	(void) argc;
+	(void) argv;
+	jl_dev_t dev_61xx_0 = {
+		.compat_id = JL_CHIP_61XX,
+		.name = "jl61xx-device-0",
+		.id = 0, /* must be less than JL_MAX_CHIP_NUM */
+		.io = {
+			.chip = JL_CHIP_61XX,
+			.type = JL_IO_SMI_SPI_DEMO,
+			.smi.spi.bus_id = 0
+		}
+	};
+
+	printf("cpu:%p, cpu1:%p, smi:%p, smi_gpio1:%p, i2c:%p, i2c_gpio_1:%p, spi:%p, spi1:%p",
+			&dev_61xx_0.io.cpu, &dev_61xx_0.io.cpu.priv,
+			&dev_61xx_0.io.smi, &dev_61xx_0.io.smi.gpio.mdc,
+			&dev_61xx_0.io.i2c, &dev_61xx_0.io.i2c.gpio.scl,
+			&dev_61xx_0.io.spi, &dev_61xx_0.io.spi.raw.priv);
+
+	return 0;
+}

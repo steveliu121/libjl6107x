@@ -1,0 +1,50 @@
+#
+#Windows specified configs
+#
+ifeq ($(CONFIG_OS_WIN), y)
+CFLAGS += -D__USE_MINGW_ANSI_STDIO
+CFLAGS += -DCONFIG_JL_STATIC_LINK
+ifeq ($(CONFIG_SMI_OVER_FTDI), y)
+#TODO
+CFLAGS += -I$(JL_SDK_DIR)/3rdparty/libftd2xx/libftd2xx_linux
+LDFLAGS += -L$(JL_SDK_DIR)/3rdparty/libftd2xx/libftd2xx_windows/amd64 -lftd2xx64
+endif
+ifeq ($(CONFIG_SMI_OVER_HID), y)
+LDFLAGS += -lsetupapi
+endif
+ifeq ($(CONFIG_SMI_OVER_WINUSB), y)
+LDFLAGS += -lwinusb -lcfgmgr32
+endif
+endif
+
+#
+#Linux specified configs
+#
+ifeq ($(CONFIG_OS_LINUX), y)
+ifeq ($(CONFIG_SMI_OVER_FTDI), y)
+#TODO
+CFLAGS += -I$(JL_SDK_DIR)/3rdparty/libftd2xx/libftd2xx_linux
+LDFLAGS += -L$(JL_SDK_DIR)/3rdparty/libftd2xx/libftd2xx_linux/build -Wl,-Bstatic -lftd2xx
+LDFLAGS += -Wl,-Bdynamic -ldl -lrt -lpthread
+endif
+ifeq ($(CONFIG_SMI_OVER_HID), y)
+CFLAGS += `pkg-config libusb-1.0 --cflags`
+LDFLAGS += -Wl,--no-as-needed -ldl -lrt -lpthread `pkg-config libusb-1.0 --libs`
+endif
+ifeq ($(CONFIG_SMI_OVER_WINUSB), y)
+CFLAGS += `pkg-config libusb-1.0 --cflags`
+LDFLAGS += -lusb-1.0
+endif
+endif
+
+
+#
+#Global config
+#
+#XXX does windows need -shared???
+CFLAGS_SO += -fPIC $(CFLAGS) -DCONFIG_JL_DLL_EXPORT_SYMBOL
+LDFLAGS_SO += -shared $(LDFLAGS)
+
+#
+#User config
+#

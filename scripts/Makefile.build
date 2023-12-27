@@ -1,0 +1,72 @@
+SRC_DIRS += $(DRV_DIRS)
+SRC_FILES += $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.c))
+
+obj-y += $(patsubst %.c, %.o, $(SRC_FILES))
+#TODO
+obj-y += $(DRIVER_DIR)/jl_reg_io.o \
+	        $(DRIVER_DIR)/jl_reg_ida.o
+obj-$(CONFIG_DUMP_REG_WRITE) += $(DRIVER_DIR)/dbg_dump_write.o
+
+ifeq ($(CONFIG_CHIP_JL61XX), y)
+obj-$(CONFIG_IO_SMI) += $(DRIVER_DIR)/smi/hal_jl61xx_smi.o
+obj-$(CONFIG_IO_I2C) += $(DRIVER_DIR)/i2c/hal_jl61xx_i2c.o \
+                                $(PORTABLE_DIR)/jl_portable_osdep.o
+obj-$(CONFIG_IO_SPI) += $(DRIVER_DIR)/spi/hal_spi.o \
+	                        $(DRIVER_DIR)/spi/hal_jl61xx_spi.o \
+                                $(PORTABLE_DIR)/jl_portable_osdep.o
+obj-$(CONFIG_IO_CPU) += $(DRIVER_DIR)/cpu/hal_jl61xx_cpu.o \
+                                $(PORTABLE_DIR)/demo_freertos.o
+
+endif
+
+obj-$(CONFIG_CHIP_JL51XX) += $(DRIVER_DIR)/smi/hal_jl51xx_smi.o
+
+obj-$(CONFIG_SMI_OVER_MDIO) += $(DRIVER_DIR)/smi/hal_smi_mdio.o \
+				$(PORTABLE_DIR)/jl_portable_mdio.o \
+				$(PORTABLE_DIR)/jl_portable_osdep.o
+obj-$(CONFIG_SMI_OVER_GPIO) += $(DRIVER_DIR)/smi/hal_smi_gpio.o \
+				$(PORTABLE_DIR)/jl_portable_gpio.o \
+				$(PORTABLE_DIR)/jl_portable_osdep.o
+obj-$(CONFIG_SMI_OVER_SPI) += $(DRIVER_DIR)/smi/hal_smi_spi.o \
+				$(PORTABLE_DIR)/jl_portable_spi.o \
+				$(PORTABLE_DIR)/jl_portable_osdep.o
+
+obj-$(CONFIG_I2C_RAW) += $(DRIVER_DIR)/i2c/hal_jl61xx_i2c.o \
+                                $(PORTABLE_DIR)/jl_portable_i2c.o \
+                                $(PORTABLE_DIR)/jl_portable_osdep.o
+
+obj-$(CONFIG_I2C_OVER_GPIO) += $(DRIVER_DIR)/i2c/hal_i2c_gpio.o \
+                                $(PORTABLE_DIR)/jl_portable_gpio.o \
+                                $(PORTABLE_DIR)/jl_portable_osdep.o
+
+obj-$(CONFIG_SPI_RAW) += $(DRIVER_DIR)/spi/hal_spi.o \
+                                $(PORTABLE_DIR)/jl_portable_spi.o \
+                                $(PORTABLE_DIR)/jl_portable_osdep.o
+
+
+#
+#Demo part
+#
+obj-$(CONFIG_SMI_OVER_FTDI) += $(DRIVER_DIR)/smi/hal_smi_spi.o \
+				$(PORTABLE_DIR)/demo_spi_ftdi.o \
+				$(PORTABLE_DIR)/demo_osdep.o
+obj-$(CONFIG_SMI_OVER_WINUSB) += $(DRIVER_DIR)/smi/hal_smi_mdio.o \
+ 				$(PORTABLE_DIR)/demo_mdio.o \
+ 				$(PORTABLE_DIR)/demo_osdep.o
+ifeq ($(CONFIG_OS_LINUX), y)
+obj-$(CONFIG_SMI_OVER_HID) += $(DRIVER_DIR)/demo_hid_libusb.o \
+				$(DRIVER_DIR)/smi/demo_smi_hid_spi.o \
+				$(PORTABLE_DIR)/demo_osdep.o
+endif
+ifeq ($(CONFIG_OS_WIN), y)
+obj-$(CONFIG_SMI_OVER_HID) += $(DRIVER_DIR)/demo_hid_windows.o \
+				$(DRIVER_DIR)/smi/demo_smi_hid_spi.o \
+				$(PORTABLE_DIR)/demo_osdep.o
+endif
+
+%.o: %.c
+	@$(CC) $(CFLAGS) -c -o $@ $<
+
+%.os: %.c
+	@$(CC) $(CFLAGS_SO) -c -o $@ $<
+

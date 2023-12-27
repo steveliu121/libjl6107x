@@ -1,0 +1,2 @@
+ACTION=="add", ATTRS{idVendor}=="0403", MODE:="666"
+ACTION=="add", ATTRS{idVendor}=="0403", ATTR{interface}=="Single RS232-HS", RUN+="/bin/sh -c '/bin/echo $kernel > /sys/bus/usb/drivers/ftdi_sio/unbind'"

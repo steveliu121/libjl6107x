@@ -1,0 +1,25 @@
+sobj-y += $(patsubst %.o, %.os, $(obj-y))
+
+ifeq ($(CONFIG_OS_WIN), y)
+TARGET_SHARED_LIB := libjl61xx.dll
+TARGET_STATIC_LIB := libjl61xx.lib
+else ifeq ($(CONFIG_OS_LINUX), y)
+TARGET_SHARED_LIB := libjl61xx.so
+TARGET_STATIC_LIB := libjl61xx.a
+else
+TARGET_SHARED_LIB :=
+TARGET_STATIC_LIB := libjl61xx.a
+endif
+
+target_lib: $(TARGET_SHARED_LIB) $(TARGET_STATIC_LIB)
+
+$(TARGET_SHARED_LIB): $(sobj-y)
+	$(CC) -o $@ $^ $(LDFLAGS_SO)
+
+$(TARGET_STATIC_LIB): $(obj-y)
+	@$(AR) -crs $@ $^
+
+libs_clean:
+	@echo "Cleaning libraies..."
+	@rm -f $(obj-y) $(sobj-y) \
+		$(TARGET_SHARED_LIB) $(TARGET_STATIC_LIB)
